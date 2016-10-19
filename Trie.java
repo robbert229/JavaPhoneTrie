@@ -233,7 +233,6 @@ public class Trie {
             temp = root._children.get('z');
             if(temp != null)
                 nodes.add(temp);
-
         } else {
             throw new IllegalArgumentException("Invalid number '" + number + "'");
         }

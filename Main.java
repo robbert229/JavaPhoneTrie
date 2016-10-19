@@ -9,41 +9,63 @@ import java.util.Scanner;
  */
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
+        Trie t = buildTrieFromFile("dictionary.txt");
+
+        Scanner kb = new Scanner(System.in);
+
+        while(true) {
+            System.out.print("Enter a word or comma separated integers -> ");
+            String line = kb.nextLine();
+            
+            if(line.compareTo("exit") == 0)
+                return;
+            
+            try {
+                List<String> words = parseLine(line, t);
+                printResults(words);
+            } catch (Exception e){
+                System.out.println("Invalid Input - " + e.getMessage());
+            }
+        }
+    }
+
+    private static void printResults(List<String> words){
+        System.out.println("Results");
+        for(String word : words){
+            System.out.println("\t" + word);
+        }
+    }
+
+    private static List<String> parseLine(String line, Trie t){
+        List<String> words;
+        
+        if(line.contains(",")){
+            words = t.searchPhone(
+                    Arrays.asList(line.split(","))
+                            .parallelStream()
+                            .mapToInt(Integer::parseInt)
+                            .toArray());
+        } else {
+            words = t.searchPrefix(line);
+        }
+
+        return words;
+    }
+
+    private static Trie buildTrieFromFile(String filename) throws FileNotFoundException {
         Trie t = new Trie();
-        Scanner fin = new Scanner(new File("words.txt"));
+        Scanner fin = new Scanner(new File(filename));
 
         System.out.println("Reading File");
 
         while(fin.hasNextLine()){
             String line = fin.nextLine();
-            t.insert(line.toLowerCase());
+            String[] tokens = line.split(",");
+            t.insert(tokens[0].toLowerCase());
         }
 
         System.out.println("Trie Loaded, size: " + t.size());
 
-        Scanner kb = new Scanner(System.in);
-        String line;
-
-        do {
-            System.out.print("Enter a word or comma seperated integers -> ");
-            line = kb.nextLine();
-
-            List<String> words;
-            if(line.contains(",")){
-                words = t.searchPhone(
-                        Arrays.asList(line.split(","))
-                                .parallelStream()
-                                .mapToInt(Integer::parseInt)
-                                .toArray());
-            } else {
-                words = t.searchPrefix(line);
-            }
-
-            System.out.println("Results");
-            for(String word : words){
-                System.out.println("\t" + word);
-            }
-        } while(!line.equals("exit"));
-
+        return t;
     }
 }
